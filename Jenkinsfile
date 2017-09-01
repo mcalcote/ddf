@@ -38,7 +38,7 @@ pipeline {
                         node('proxmox-windows') {
                             checkout scm
                             timeout(time: 3, unit: 'HOURS') {
-                                withMaven(maven: 'M3', globalMavenSettingsConfig: 'default-global-settings', mavenSettingsConfig: 'codice-maven-settings') {
+                                withMaven(maven: 'M3', jdk:'jdk8-latest', globalMavenSettingsConfig: 'default-global-settings', mavenSettingsConfig: 'codice-maven-settings') {
                                     bat 'mvn clean install -B -T 1C -pl !%ITESTS%'
                                     bat 'mvn install -B -Dmaven.test.redirectTestOutputToFile=true -pl %ITESTS% -nsu'
                                 }
