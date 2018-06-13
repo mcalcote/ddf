@@ -15,11 +15,15 @@ package org.codice.ddf.itests.common.opensearch;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.RestAssured.when;
+import static org.codice.ddf.itests.common.AbstractIntegrationTest.OPENSEARCH_PATH;
 
+import com.google.common.net.HttpHeaders;
+import com.jayway.restassured.response.Response;
 import com.jayway.restassured.response.ValidatableResponse;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.codice.ddf.itests.common.AbstractIntegrationTest;
 import org.codice.ddf.itests.common.ServiceManager;
@@ -57,10 +61,7 @@ public class OpenSearchTestCommons {
   public static ValidatableResponse getOpenSearch(
       String format, String username, String password, String... queryParams) {
     StringBuilder buffer =
-        new StringBuilder(AbstractIntegrationTest.OPENSEARCH_PATH.getUrl())
-            .append("?")
-            .append("format=")
-            .append(format);
+        new StringBuilder(OPENSEARCH_PATH.getUrl()).append("?").append("format=").append(format);
 
     Arrays.stream(queryParams).forEach(term -> buffer.append("&").append(term));
 
@@ -72,5 +73,25 @@ public class OpenSearchTestCommons {
     } else {
       return given().auth().preemptive().basic(username, password).when().get(url).then();
     }
+  }
+
+  public static Response getOpenSearchAsXml(String... query) {
+    StringBuilder buffer =
+        new StringBuilder(OPENSEARCH_PATH.getUrl()).append("?format=xml&count=100");
+
+    for (String term : query) {
+      buffer.append("&").append(term);
+    }
+
+    String url = buffer.toString();
+    LOGGER.info("Getting response to {}", url);
+
+    return given()
+        .auth()
+        .preemptive()
+        .basic("localhost", "localhost")
+        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML)
+        .when()
+        .get(url);
   }
 }
